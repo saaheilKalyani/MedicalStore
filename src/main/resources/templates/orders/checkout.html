@@ -1,0 +1,48 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>Checkout</title>
+    <link href="/css/tailwind.css" rel="stylesheet"/>
+</head>
+<body class="p-6 bg-gray-50">
+<div class="container mx-auto">
+    <h1 class="text-2xl font-semibold mb-4">Checkout</h1>
+
+    <form th:action="@{/checkout}" th:object="${order}" method="post" class="bg-white p-6 rounded shadow space-y-4">
+        <!-- userId must be set server-side or via a hidden field -->
+        <input type="hidden" th:field="*{userId}" />
+
+        <div th:each="it,iterStat : *{items}">
+            <label class="block">
+                <span>Medicine ID</span>
+                <input type="number" th:field="*{items[__${iterStat.index}__].medicineId}" class="mt-1 block w-full border rounded p-2"/>
+            </label>
+
+            <label class="block mt-2">
+                <span>Quantity</span>
+                <input type="number" th:field="*{items[__${iterStat.index}__].quantity}" min="1" class="mt-1 block w-full border rounded p-2"/>
+            </label>
+
+            <label class="block mt-2">
+                <span>Price</span>
+                <input type="text" th:field="*{items[__${iterStat.index}__].price}" class="mt-1 block w-full border rounded p-2"/>
+            </label>
+
+            <hr class="my-4"/>
+        </div>
+
+        <div>
+            <label>
+                <span>Total Amount</span>
+                <input type="text" th:field="*{totalAmount}" class="mt-1 block w-full border rounded p-2"/>
+            </label>
+        </div>
+
+        <div class="flex justify-end">
+            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded">Place Order</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

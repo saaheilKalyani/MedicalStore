@@ -1,0 +1,37 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>Orders - Medical Store</title>
+    <link href="/css/tailwind.css" rel="stylesheet"/>
+</head>
+<body class="p-6 bg-gray-50">
+<div class="container mx-auto">
+    <h1 class="text-2xl font-semibold mb-4">Orders</h1>
+    <table class="min-w-full bg-white rounded shadow">
+        <thead>
+        <tr class="bg-gray-100 text-left">
+            <th class="p-3">Order ID</th>
+            <th class="p-3">User ID</th>
+            <th class="p-3">Total</th>
+            <th class="p-3">Date</th>
+            <th class="p-3">Status</th>
+            <th class="p-3">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="o : ${orders}" class="border-b">
+            <td class="p-3" th:text="${o.orderId}">1</td>
+            <td class="p-3" th:text="${o.userId}">2</td>
+            <td class="p-3" th:text="${o.totalAmount}">100.00</td>
+            <td class="p-3" th:text="${o.orderDate}">2025-01-01</td>
+            <td class="p-3" th:text="${o.status}">PENDING</td>
+            <td class="p-3">
+                <a th:href="@{|/order/${o.orderId}|}" class="text-indigo-600 hover:underline">View</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
