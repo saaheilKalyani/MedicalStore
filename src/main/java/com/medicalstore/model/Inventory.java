@@ -1,36 +1,29 @@
 package com.medicalstore.model;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 public class Inventory {
     private Integer inventoryId;
-
-    @NotNull(message = "Supplier ID required")
     private Integer supplierId;
-
-    @NotNull(message = "Medicine ID required")
     private Integer medicineId;
-
-    @NotNull(message = "Quantity required")
-    @Min(value = 0, message = "Quantity must be >= 0")
     private Integer quantity;
-
     private LocalDateTime lastUpdated;
+    private String medicineName;
+    private String supplierName;
 
     // Constructors
-    public Inventory() {}
+    public Inventory() {
+        this.lastUpdated = LocalDateTime.now(); // Initialize with current time
+    }
 
-    public Inventory(Integer inventoryId, Integer supplierId, Integer medicineId, Integer quantity, LocalDateTime lastUpdated) {
-        this.inventoryId = inventoryId;
+    public Inventory(Integer supplierId, Integer medicineId, Integer quantity) {
         this.supplierId = supplierId;
         this.medicineId = medicineId;
         this.quantity = quantity;
-        this.lastUpdated = lastUpdated;
+        this.lastUpdated = LocalDateTime.now();
     }
 
-    // getters & setters
+    // Getters and Setters
     public Integer getInventoryId() { return inventoryId; }
     public void setInventoryId(Integer inventoryId) { this.inventoryId = inventoryId; }
 
@@ -43,6 +36,17 @@ public class Inventory {
     public Integer getQuantity() { return quantity; }
     public void setQuantity(Integer quantity) { this.quantity = quantity; }
 
-    public LocalDateTime getLastUpdated() { return lastUpdated; }
+    public LocalDateTime getLastUpdated() {
+        if (lastUpdated == null) {
+            lastUpdated = LocalDateTime.now();
+        }
+        return lastUpdated;
+    }
     public void setLastUpdated(LocalDateTime lastUpdated) { this.lastUpdated = lastUpdated; }
+
+    public String getMedicineName() { return medicineName; }
+    public void setMedicineName(String medicineName) { this.medicineName = medicineName; }
+
+    public String getSupplierName() { return supplierName; }
+    public void setSupplierName(String supplierName) { this.supplierName = supplierName; }
 }

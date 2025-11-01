@@ -1,25 +1,26 @@
 package com.medicalstore.model;
 
 import java.math.BigDecimal;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 
 public class OrderItem {
     private Integer itemId;
-
-    @NotNull(message = "orderId required")
     private Integer orderId;
-
-    @NotNull(message = "medicineId required")
     private Integer medicineId;
-
-    @Min(value = 1, message = "quantity must be >= 1")
     private Integer quantity;
-
-    @NotNull(message = "price required")
     private BigDecimal price;
+    private String medicineName; // For display
 
-    // getters / setters
+    // Constructors
+    public OrderItem() {}
+
+    public OrderItem(Integer orderId, Integer medicineId, Integer quantity, BigDecimal price) {
+        this.orderId = orderId;
+        this.medicineId = medicineId;
+        this.quantity = quantity;
+        this.price = price;
+    }
+
+    // Getters and Setters
     public Integer getItemId() { return itemId; }
     public void setItemId(Integer itemId) { this.itemId = itemId; }
 
@@ -34,4 +35,7 @@ public class OrderItem {
 
     public BigDecimal getPrice() { return price; }
     public void setPrice(BigDecimal price) { this.price = price; }
+
+    public String getMedicineName() { return medicineName; }
+    public void setMedicineName(String medicineName) { this.medicineName = medicineName; }
 }

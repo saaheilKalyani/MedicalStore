@@ -3,7 +3,7 @@ package com.medicalstore.repository.impl;
 import com.medicalstore.model.Order;
 import com.medicalstore.model.OrderItem;
 import com.medicalstore.repository.OrderRepository;
-import com.medicalstore.repository.OrderItemRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -19,44 +19,64 @@ import java.util.Optional;
 public class OrderRepositoryImpl implements OrderRepository {
 
     private final JdbcTemplate jdbcTemplate;
-    private final OrderItemRepository orderItemRepository;
-    private final RowMapper<Order> orderRowMapper;  // ✅ declare field properly here
+    private final RowMapper<Order> orderRowMapper;
 
-    // ✅ Constructor — initializes all fields
-    public OrderRepositoryImpl(JdbcTemplate jdbcTemplate, OrderItemRepository orderItemRepository) {
+    @Autowired
+    public OrderRepositoryImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.orderItemRepository = orderItemRepository;
 
-        // initialize RowMapper after dependencies are injected
         this.orderRowMapper = (rs, rowNum) -> {
-            Order o = new Order();
-            o.setOrderId(rs.getInt("order_id"));
-            o.setUserId(rs.getInt("user_id"));
-            o.setTotalAmount(rs.getBigDecimal("total_amount"));
-            Timestamp ts = rs.getTimestamp("order_date");
-            if (ts != null) {
-                o.setOrderDate(ts.toLocalDateTime());
-            }
-            o.setStatus(rs.getString("status"));
+            Order order = new Order();
+            order.setOrderId(rs.getInt("order_id"));
+            order.setUserId(rs.getInt("user_id"));
+            order.setTotalAmount(rs.getBigDecimal("total_amount"));
 
-            // lazy load items for this order
-            o.setItems(orderItemRepository.findByOrderId(o.getOrderId()));
-            return o;
+            Timestamp orderDate = rs.getTimestamp("order_date");
+            if (orderDate != null) {
+                order.setOrderDate(orderDate.toLocalDateTime());
+            }
+
+            order.setStatus(rs.getString("status"));
+
+            // Load order items
+            String itemsSql = "SELECT oi.*, m.name as medicine_name FROM order_items oi " +
+                    "JOIN medicines m ON oi.medicine_id = m.medicine_id " +
+                    "WHERE oi.order_id = ?";
+            List<OrderItem> items = jdbcTemplate.query(itemsSql, (itemRs, itemRowNum) -> {
+                OrderItem item = new OrderItem();
+                item.setItemId(itemRs.getInt("item_id"));
+                item.setOrderId(itemRs.getInt("order_id"));
+                item.setMedicineId(itemRs.getInt("medicine_id"));
+                item.setQuantity(itemRs.getInt("quantity"));
+                item.setPrice(itemRs.getBigDecimal("price"));
+                item.setMedicineName(itemRs.getString("medicine_name"));
+                return item;
+            }, order.getOrderId());
+
+            order.setItems(items);
+            return order;
         };
     }
 
     @Override
     public List<Order> findAll() {
-        String sql = "SELECT * FROM orders ORDER BY order_date DESC";
+        String sql = "SELECT o.*, u.username as user_name FROM orders o " +
+                "JOIN users u ON o.user_id = u.user_id " +
+                "ORDER BY o.order_date DESC";
         return jdbcTemplate.query(sql, orderRowMapper);
     }
 
     @Override
-    public Optional<Order> findById(Integer id) {
-        String sql = "SELECT * FROM orders WHERE order_id = ?";
-        List<Order> list = jdbcTemplate.query(sql, orderRowMapper, id);
-        // ✅ use get(0) safely
-        return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
+    public Optional<Order> findById(Integer orderId) {
+        String sql = "SELECT o.*, u.username as user_name FROM orders o " +
+                "JOIN users u ON o.user_id = u.user_id " +
+                "WHERE o.order_id = ?";
+        try {
+            Order order = jdbcTemplate.queryForObject(sql, orderRowMapper, orderId);
+            return Optional.of(order);
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -65,28 +85,29 @@ public class OrderRepositoryImpl implements OrderRepository {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"order_id"}); // FIX: Specify the column name
             ps.setInt(1, order.getUserId());
-            ps.setBigDecimal(2, order.getTotalAmount() != null ? order.getTotalAmount() : BigDecimal.ZERO);
-            ps.setObject(3, order.getOrderDate() != null ?
-                    Timestamp.valueOf(order.getOrderDate()) :
-                    new Timestamp(System.currentTimeMillis()));
-            ps.setString(4, order.getStatus() != null ? order.getStatus() : "PENDING");
+            ps.setBigDecimal(2, order.getTotalAmount());
+            ps.setTimestamp(3, Timestamp.valueOf(order.getOrderDate()));
+            ps.setString(4, order.getStatus());
             return ps;
         }, keyHolder);
 
-        Number key = keyHolder.getKey();
-        Integer orderId = (key != null) ? key.intValue() : null;
-
-        // save order items if available
-        if (orderId != null && order.getItems() != null && !order.getItems().isEmpty()) {
-            for (OrderItem item : order.getItems()) {
-                item.setOrderId(orderId);
-            }
-            orderItemRepository.saveAll(order.getItems());
+        // Get generated key - FIXED: Use the correct method for PostgreSQL
+        Integer orderId = null;
+        if (keyHolder.getKeys() != null && keyHolder.getKeys().containsKey("order_id")) {
+            orderId = (Integer) keyHolder.getKeys().get("order_id");
+        } else if (keyHolder.getKey() != null) {
+            orderId = keyHolder.getKey().intValue();
         }
 
         return orderId;
+    }
+
+    @Override
+    public void saveOrderItem(Integer orderId, Integer medicineId, Integer quantity, BigDecimal price) {
+        String sql = "INSERT INTO order_items (order_id, medicine_id, quantity, price) VALUES (?, ?, ?, ?)";
+        jdbcTemplate.update(sql, orderId, medicineId, quantity, price);
     }
 
     @Override
@@ -97,7 +118,9 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     @Override
     public List<Order> findByUserId(Integer userId) {
-        String sql = "SELECT * FROM orders WHERE user_id = ? ORDER BY order_date DESC";
+        String sql = "SELECT o.*, u.username as user_name FROM orders o " +
+                "JOIN users u ON o.user_id = u.user_id " +
+                "WHERE o.user_id = ? ORDER BY o.order_date DESC";
         return jdbcTemplate.query(sql, orderRowMapper, userId);
     }
 }

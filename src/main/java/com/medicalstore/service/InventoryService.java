@@ -5,12 +5,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface InventoryService {
-    List<Inventory> listAll();
-    List<Inventory> listBySupplier(int supplierId);
-    Optional<Inventory> getById(int inventoryId);
-    Optional<Inventory> getByMedicineAndSupplier(int medicineId, int supplierId);
-    Integer addInventory(Inventory inventory);
-    void updateStock(int inventoryId, int newQuantity);
-    List<Inventory> listLowStock(int threshold);
-    boolean existsByMedicineAndSupplier(int medicineId, int supplierId);
+    List<Inventory> getAllInventory();
+    Optional<Inventory> getInventoryById(Integer inventoryId);
+    Inventory saveInventory(Inventory inventory);
+    void deleteInventory(Integer inventoryId);
+    Inventory getInventoryByMedicineId(Integer medicineId);
+    void updateInventoryQuantity(Integer medicineId, Integer quantity);
+    List<Inventory> getInventoryBySupplierId(Integer supplierId);
 }

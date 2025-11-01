@@ -1,96 +1,73 @@
 package com.medicalstore.controller;
 
 import com.medicalstore.model.Order;
-import com.medicalstore.model.OrderItem;
-import com.medicalstore.repository.UserRepository;
 import com.medicalstore.service.OrderService;
-import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.math.BigDecimal;
-import java.security.Principal;
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Optional;
 
-@Controller
+@RestController
+@RequestMapping("/api/orders")
+@CrossOrigin(origins = "http://localhost:3000")
 public class OrderController {
 
-    private final OrderService orderService;
-    private final UserRepository userRepository;
+    @Autowired
+    private OrderService orderService;
 
-    public OrderController(OrderService orderService, UserRepository userRepository) {
-        this.orderService = orderService;
-        this.userRepository = userRepository;
+    @GetMapping
+    public List<Order> getAllOrders() {
+        return orderService.getAllOrders();
     }
 
-    // View all orders (Admin, Supplier, Customer -> role restriction can be looser here)
-    @GetMapping("/orders")
-    public String viewOrders(Model model, Principal principal) {
-        // For simplicity show all orders to logged in users; enforce role checks in template if needed.
-        model.addAttribute("orders", orderService.listAll());
-        return "orders/list";
+    @GetMapping("/{orderId}")
+    public ResponseEntity<Order> getOrderById(@PathVariable Integer orderId) {
+        Optional<Order> order = orderService.getOrderById(orderId);
+        return order.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
-    // Checkout page - show blank form or prefill based on cart mechanism you use
-    @GetMapping("/checkout")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public String checkoutForm(Model model, Principal principal) {
-        Order order = new Order();
-        order.setUserId(null); // populated in POST from principal in your app
-        // example: one empty item to render fields
-        OrderItem it = new OrderItem();
-        it.setQuantity(1);
-        it.setPrice(BigDecimal.ZERO);
-        List<OrderItem> items = new ArrayList<>();
-        items.add(it);
-        order.setItems(items);
-        model.addAttribute("order", order);
-        return "orders/checkout";
+    @PostMapping
+    public ResponseEntity<?> createOrder(@RequestBody Order order) {
+        try {
+            Integer orderId = orderService.createOrder(order);
+            if (orderId != null) {
+                return ResponseEntity.ok().body("{\"message\": \"Order created successfully\", \"orderId\": " + orderId + "}");
+            } else {
+                return ResponseEntity.badRequest().body("{\"error\": \"Failed to create order\"}");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"error\": \"" + e.getMessage() + "\"}");
+        }
     }
 
-    // Place new order
     @PostMapping("/checkout")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public String placeOrder(@Valid @ModelAttribute("order") Order order,
-                             BindingResult br,
-                             Principal principal,
-                             Model model) {
-        if (br.hasErrors()) {
-            model.addAttribute("order", order);
-            return "orders/checkout";
+    public ResponseEntity<?> checkout(@RequestBody Order order) {
+        try {
+            boolean success = orderService.checkout(order);
+            if (success) {
+                return ResponseEntity.ok().body("{\"message\": \"Checkout successful\"}");
+            } else {
+                return ResponseEntity.badRequest().body("{\"error\": \"Checkout failed\"}");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"error\": \"Checkout failed: " + e.getMessage() + "\"}");
         }
-
-        // ✅ Map principal name → userId from DB
-        String username = principal.getName();
-        Integer userId = userRepository.findUserIdByUsername(username);
-        order.setUserId(userId);
-
-        order.setStatus("PENDING");
-        Integer id = orderService.placeOrder(order);
-        return "redirect:/order/" + id;
     }
 
-    // View single order details (open to all authenticated)
-    @GetMapping("/order/{id}")
-    public String orderDetails(@PathVariable("id") Integer id, Model model) {
-        Optional<Order> opt = orderService.getById(id);
-        if (opt.isEmpty()) {
-            return "redirect:/orders?notfound";
+    @PutMapping("/{orderId}/status")
+    public ResponseEntity<?> updateOrderStatus(@PathVariable Integer orderId, @RequestParam String status) {
+        try {
+            orderService.updateOrderStatus(orderId, status);
+            return ResponseEntity.ok().body("{\"message\": \"Order status updated successfully\"}");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"error\": \"Failed to update order status\"}");
         }
-        model.addAttribute("order", opt.get());
-        return "orders/details";
     }
 
-    // Update status - Admin or Supplier
-    @PostMapping("/order/status/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','SUPPLIER')")
-    public String updateStatus(@PathVariable("id") Integer id,
-                               @RequestParam("status") String status) {
-        orderService.updateStatus(id, status);
-        return "redirect:/order/" + id;
+    @GetMapping("/user/{userId}")
+    public List<Order> getOrdersByUserId(@PathVariable Integer userId) {
+        return orderService.getOrdersByUserId(userId);
     }
 }
