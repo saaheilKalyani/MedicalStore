@@ -5,7 +5,7 @@ import com.medicalstore.repository.UserRepository;
 import com.medicalstore.service.AuthService;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -38,18 +38,17 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public boolean registerUser(User user, String rawPassword) {
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            return false; // username already exists
+            return false;
         }
         user.setPassword(passwordEncoder.encode(rawPassword));
         if (user.getRole() == null) user.setRole("ROLE_USER");
-        user.setCreatedAt(LocalDateTime.now());
         return userRepository.save(user) > 0;
     }
 
     @Override
     public boolean updateUser(User user) {
         if (user.getPassword() == null || user.getPassword().isEmpty()) {
-            userRepository.findById(user.getId()).ifPresent(u -> user.setPassword(u.getPassword()));
+            userRepository.findById(user.getUserId()).ifPresent(u -> user.setPassword(u.getPassword()));
         } else {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
