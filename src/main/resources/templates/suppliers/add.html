@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add Supplier</title>
+    <link href="/css/tailwind.css" rel="stylesheet">
+</head>
+<body class="p-6 bg-gray-50">
+<div class="container mx-auto max-w-lg">
+    <h1 class="text-xl font-semibold mb-4">Add Supplier</h1>
+
+    <!-- Error Message -->
+    <div th:if="${error}" class="mb-4 p-3 bg-red-100 text-red-700 rounded">
+        <span th:text="${error}">Error message</span>
+    </div>
+
+    <form th:action="@{/supplier/add}" th:object="${supplierDto}" method="post" class="space-y-4 bg-white p-6 rounded-lg shadow">
+        <div>
+            <label class="block text-gray-700 font-medium">Username</label>
+            <input th:field="*{username}" class="mt-1 p-2 border rounded w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"/>
+            <p th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="text-red-600 text-sm mt-1"></p>
+        </div>
+
+        <div>
+            <label class="block text-gray-700 font-medium">Password</label>
+            <input type="password" th:field="*{password}" class="mt-1 p-2 border rounded w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"/>
+            <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-red-600 text-sm mt-1"></p>
+        </div>
+
+        <div>
+            <label class="block text-gray-700 font-medium">Email</label>
+            <input th:field="*{email}" class="mt-1 p-2 border rounded w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"/>
+            <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-red-600 text-sm mt-1"></p>
+        </div>
+
+        <div>
+            <label class="block text-gray-700 font-medium">Address</label>
+            <textarea th:field="*{address}" class="mt-1 p-2 border rounded w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500" rows="3"></textarea>
+            <p th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="text-red-600 text-sm mt-1"></p>
+        </div>
+
+        <div class="flex justify-end space-x-2 pt-4">
+            <a href="/suppliers" class="px-4 py-2 rounded border hover:bg-gray-100 transition">Cancel</a>
+            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">Save Supplier</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>
