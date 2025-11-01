@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Medicines</title>
+    <link href="/static/tailwind.css" rel="stylesheet"/>
+</head>
+<body class="p-6">
+<h1 class="text-2xl mb-4">Medicines</h1>
+
+<a href="/medicine/add" class="px-4 py-2 bg-blue-600 text-white rounded">Add Medicine</a>
+
+<table class="min-w-full mt-4 border">
+    <thead>
+    <tr>
+        <th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Qty</th><th>Expiry</th><th>Supplier</th><th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="m : ${medicines}">
+        <td th:text="${m.medicineId}">1</td>
+        <td th:text="${m.name}">Paracetamol</td>
+        <td th:text="${m.categoryId}">1</td> <!-- replace with category name if you load it -->
+        <td th:text="${m.price}">35.50</td>
+        <td th:text="${m.quantity}">200</td>
+        <td th:text="${m.expiryDate}">2026-12-31</td>
+        <td th:text="${m.supplierId}">2</td> <!-- replace with supplier name if you load it -->
+        <td>
+            <a th:href="@{'/medicine/edit/' + ${m.medicineId}}" class="mr-2">Edit</a>
+            <form th:action="@{'/medicine/delete/' + ${m.medicineId}}" method="post" style="display:inline">
+                <button type="submit" onclick="return confirm('Delete?')">Delete</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
