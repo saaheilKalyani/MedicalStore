@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Suppliers</title>
+    <link href="/css/tailwind.css" rel="stylesheet">
+</head>
+<body class="p-6 bg-gray-50">
+<div class="container mx-auto">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-2xl font-bold">Suppliers</h1>
+        <a href="/supplier/add" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Add Supplier</a>
+    </div>
+
+    <!-- Success Message -->
+    <div th:if="${success}" class="mb-4 p-3 bg-green-100 text-green-700 rounded">
+        <span th:text="${success}">Success message</span>
+    </div>
+
+    <table class="min-w-full bg-white shadow rounded-lg overflow-hidden">
+        <thead>
+        <tr class="bg-gray-100">
+            <th class="p-3 text-left">ID</th>
+            <th class="p-3 text-left">Username</th>
+            <th class="p-3 text-left">Email</th>
+            <th class="p-3 text-left">Address</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="s : ${suppliers}" class="border-t hover:bg-gray-50">
+            <td class="p-3" th:text="${s.userId}"></td>
+            <td class="p-3" th:text="${s.username}"></td>
+            <td class="p-3" th:text="${s.email}"></td>
+            <td class="p-3" th:text="${s.address}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
