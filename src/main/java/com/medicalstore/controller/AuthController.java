@@ -83,6 +83,19 @@ public class AuthController {
         model.addAttribute("user", loggedInUser);
         return "auth/profile";
     }
+    @GetMapping("/orders/create")
+    public String createOrderPage(HttpSession session, Model model) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("user", loggedInUser);
+        return "orders/create";
+    }
+    @GetMapping("/orders")
+    public String ordersPage() {
+        return "orders/list";
+    }
 
     // ✅ Admin - List Users
     @GetMapping("/admin/users")

@@ -1,37 +1,117 @@
-<!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="utf-8"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orders - Medical Store</title>
-    <link href="/css/tailwind.css" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="p-6 bg-gray-50">
-<div class="container mx-auto">
-    <h1 class="text-2xl font-semibold mb-4">Orders</h1>
-    <table class="min-w-full bg-white rounded shadow">
-        <thead>
-        <tr class="bg-gray-100 text-left">
-            <th class="p-3">Order ID</th>
-            <th class="p-3">User ID</th>
-            <th class="p-3">Total</th>
-            <th class="p-3">Date</th>
-            <th class="p-3">Status</th>
-            <th class="p-3">Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="o : ${orders}" class="border-b">
-            <td class="p-3" th:text="${o.orderId}">1</td>
-            <td class="p-3" th:text="${o.userId}">2</td>
-            <td class="p-3" th:text="${o.totalAmount}">100.00</td>
-            <td class="p-3" th:text="${o.orderDate}">2025-01-01</td>
-            <td class="p-3" th:text="${o.status}">PENDING</td>
-            <td class="p-3">
-                <a th:href="@{|/order/${o.orderId}|}" class="text-indigo-600 hover:underline">View</a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+<body class="bg-gray-100 min-h-screen">
+<!-- Navigation -->
+<nav class="bg-blue-600 text-white shadow-lg">
+    <div class="container mx-auto px-4 py-3">
+        <div class="flex justify-between items-center">
+            <a th:href="@{/}" class="text-xl font-bold">Medical Store</a>
+            <div class="space-x-4">
+                <a th:href="@{/medicines}" class="hover:text-blue-200">Medicines</a>
+                <a th:href="@{/categories}" class="hover:text-blue-200">Categories</a>
+                <a th:href="@{/suppliers}" class="hover:text-blue-200">Suppliers</a>
+                <a th:href="@{/profile}" class="hover:text-blue-200">Profile</a>
+                <a th:href="@{/logout}" class="hover:text-blue-200">Logout</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container mx-auto px-4 py-6">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold">All Orders</h1>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white">
+                <thead>
+                <tr class="bg-gray-200 text-gray-700">
+                    <th class="py-3 px-4 text-left">Order ID</th>
+                    <th class="py-3 px-4 text-left">User ID</th>
+                    <th class="py-3 px-4 text-left">Total Amount</th>
+                    <th class="py-3 px-4 text-left">Order Date</th>
+                    <th class="py-3 px-4 text-left">Status</th>
+                    <th class="py-3 px-4 text-left">Actions</th>
+                </tr>
+                </thead>
+                <tbody id="allOrdersTableBody">
+                <!-- Orders will be loaded here via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
+
+<script>
+    // Load all orders when page loads
+    document.addEventListener('DOMContentLoaded', loadAllOrders);
+
+    async function loadAllOrders() {
+        try {
+            const response = await fetch('/api/orders');
+            const orders = await response.json();
+            const tbody = document.getElementById('allOrdersTableBody');
+            tbody.innerHTML = '';
+
+            orders.forEach(order => {
+                const row = document.createElement('tr');
+                row.className = 'border-b hover:bg-gray-50';
+                row.innerHTML = `
+                        <td class="py-3 px-4">${order.orderId}</td>
+                        <td class="py-3 px-4">${order.userId}</td>
+                        <td class="py-3 px-4">$${order.totalAmount}</td>
+                        <td class="py-3 px-4">${new Date(order.orderDate).toLocaleDateString()}</td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 rounded-full text-xs ${
+                    order.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
+                        order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'
+                }">
+                                ${order.status}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <button onclick="updateOrderStatus(${order.orderId})"
+                                    class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-sm">
+                                Update Status
+                            </button>
+                        </td>
+                    `;
+                tbody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Error loading orders:', error);
+        }
+    }
+
+    async function updateOrderStatus(orderId) {
+        const newStatus = prompt('Enter new status (PENDING, COMPLETED, CANCELLED):');
+        if (newStatus) {
+            try {
+                const response = await fetch(`/api/orders/${orderId}/status?status=${newStatus}`, {
+                    method: 'PUT'
+                });
+
+                if (response.ok) {
+                    alert('Order status updated successfully');
+                    loadAllOrders();
+                } else {
+                    alert('Error updating order status');
+                }
+            } catch (error) {
+                console.error('Error updating order status:', error);
+                alert('Error updating order status');
+            }
+        }
+    }
+</script>
 </body>
 </html>

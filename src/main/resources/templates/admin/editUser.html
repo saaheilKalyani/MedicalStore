@@ -1,0 +1,59 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: template(title='Edit User', content=~{:: .content})}">
+<div class="content">
+    <div class="bg-white rounded-lg shadow-md p-6 max-w-2xl mx-auto">
+        <h1 class="text-2xl font-bold mb-6">Edit User</h1>
+
+        <form th:action="@{/admin/users/edit}" method="post" th:object="${user}">
+            <input type="hidden" th:field="*{userId}">
+
+            <div class="mb-4">
+                <label for="username" class="block text-gray-700 text-sm font-bold mb-2">Username</label>
+                <input type="text" id="username" th:field="*{username}" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div class="mb-4">
+                <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                <input type="email" id="email" th:field="*{email}" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div class="mb-4">
+                <label for="address" class="block text-gray-700 text-sm font-bold mb-2">Address</label>
+                <textarea id="address" th:field="*{address}"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          rows="2"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="rawPassword" class="block text-gray-700 text-sm font-bold mb-2">
+                    New Password (leave blank to keep current)
+                </label>
+                <input type="password" id="rawPassword" name="rawPassword"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div class="mb-6">
+                <label for="role" class="block text-gray-700 text-sm font-bold mb-2">Role</label>
+                <select id="role" th:field="*{role}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="CUSTOMER">CUSTOMER</option>
+                    <option value="SUPPLIER">SUPPLIER</option>
+                    <option value="ADMIN">ADMIN</option>
+                </select>
+            </div>
+
+            <div class="flex space-x-4">
+                <button type="submit"
+                        class="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    Update User
+                </button>
+                <a th:href="@{/admin/users}"
+                   class="bg-gray-500 text-white py-2 px-6 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+</html>

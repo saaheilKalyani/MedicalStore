@@ -1,39 +1,67 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Suppliers</title>
-    <link href="/css/tailwind.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suppliers - Medical Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="p-6 bg-gray-50">
-<div class="container mx-auto">
-    <div class="flex justify-between items-center mb-4">
-        <h1 class="text-2xl font-bold">Suppliers</h1>
-        <a href="/supplier/add" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Add Supplier</a>
+<body class="bg-gray-100 min-h-screen">
+<!-- Navigation -->
+<nav class="bg-blue-600 text-white shadow-lg">
+    <div class="container mx-auto px-4 py-3">
+        <div class="flex justify-between items-center">
+            <a th:href="@{/}" class="text-xl font-bold">Medical Store</a>
+            <div class="space-x-4">
+                <a th:href="@{/medicines}" class="hover:text-blue-200">Medicines</a>
+                <a th:href="@{/categories}" class="hover:text-blue-200">Categories</a>
+                <a th:href="@{/suppliers}" class="hover:text-blue-200">Suppliers</a>
+                <a th:href="@{/profile}" class="hover:text-blue-200">Profile</a>
+                <a th:href="@{/logout}" class="hover:text-blue-200">Logout</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container mx-auto px-4 py-6">
+    <!-- Success Messages -->
+    <div th:if="${param.success}" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+        Supplier added successfully!
     </div>
 
-    <!-- Success Message -->
-    <div th:if="${success}" class="mb-4 p-3 bg-green-100 text-green-700 rounded">
-        <span th:text="${success}">Success message</span>
-    </div>
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold">Suppliers</h1>
+            <a th:href="@{/supplier/add}"
+               class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Add Supplier
+            </a>
+        </div>
 
-    <table class="min-w-full bg-white shadow rounded-lg overflow-hidden">
-        <thead>
-        <tr class="bg-gray-100">
-            <th class="p-3 text-left">ID</th>
-            <th class="p-3 text-left">Username</th>
-            <th class="p-3 text-left">Email</th>
-            <th class="p-3 text-left">Address</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="s : ${suppliers}" class="border-t hover:bg-gray-50">
-            <td class="p-3" th:text="${s.userId}"></td>
-            <td class="p-3" th:text="${s.username}"></td>
-            <td class="p-3" th:text="${s.email}"></td>
-            <td class="p-3" th:text="${s.address}"></td>
-        </tr>
-        </tbody>
-    </table>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white">
+                <thead>
+                <tr class="bg-gray-200 text-gray-700">
+                    <th class="py-3 px-4 text-left">Name</th>
+                    <th class="py-3 px-4 text-left">Username</th>
+                    <th class="py-3 px-4 text-left">Email</th>
+                    <th class="py-3 px-4 text-left">Phone</th>
+                    <th class="py-3 px-4 text-left">Address</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="supplier : ${suppliers}" class="border-b hover:bg-gray-50">
+<!--                    <td class="py-3 px-4" th:text="${supplier.name}">Supplier Name</td>-->
+                    <td class="py-3 px-4" th:text="${supplier.username}">supplier_user</td>
+                    <td class="py-3 px-4" th:text="${supplier.email}">supplier@example.com</td>
+<!--                    <td class="py-3 px-4" th:text="${supplier.phone}">1234567890</td>-->
+                    <td class="py-3 px-4" th:text="${supplier.address}">Supplier Address</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 </body>
 </html>

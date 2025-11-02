@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Order - Medical Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+<!-- Navigation -->
+<nav class="bg-blue-600 text-white shadow-lg">
+    <div class="container mx-auto px-4 py-3">
+        <div class="flex justify-between items-center">
+            <a th:href="@{/}" class="text-xl font-bold">Medical Store</a>
+            <div class="space-x-4">
+                <a th:href="@{/medicines}" class="hover:text-blue-200">Medicines</a>
+                <a th:href="@{/categories}" class="hover:text-blue-200">Categories</a>
+                <a th:href="@{/suppliers}" class="hover:text-blue-200">Suppliers</a>
+                <a th:href="@{/profile}" class="hover:text-blue-200">Profile</a>
+                <a th:href="@{/logout}" class="hover:text-blue-200">Logout</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Hidden user ID -->
+<input type="hidden" id="userId" th:value="${user.userId}" />
+
+<!-- Main Content -->
+<div class="container mx-auto px-4 py-6">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-6">Create New Order</h1>
+
+        <!-- Medicine Selection -->
+        <div class="mb-6">
+            <h2 class="text-lg font-semibold mb-4">Add Medicines to Order</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label for="medicineSelect" class="block text-gray-700 text-sm font-bold mb-2">Select Medicine</label>
+                    <select id="medicineSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Loading medicines...</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="quantity" class="block text-gray-700 text-sm font-bold mb-2">Quantity</label>
+                    <input type="number" id="quantity" value="1" min="1"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            <button onclick="addMedicineToOrder()"
+                    class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Add to Order
+            </button>
+        </div>
+
+        <!-- Order Items -->
+        <div class="mb-6">
+            <h2 class="text-lg font-semibold mb-4">Order Items</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white">
+                    <thead>
+                    <tr class="bg-gray-200 text-gray-700">
+                        <th class="py-3 px-4 text-left">Medicine</th>
+                        <th class="py-3 px-4 text-left">Price</th>
+                        <th class="py-3 px-4 text-left">Quantity</th>
+                        <th class="py-3 px-4 text-left">Subtotal</th>
+                        <th class="py-3 px-4 text-left">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="orderItemsTable">
+                    <tr>
+                        <td colspan="5" class="py-4 px-4 text-center text-gray-500">No items added to order</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4 text-right">
+                <p class="text-lg font-semibold">Total: $<span id="orderTotal">0.00</span></p>
+            </div>
+        </div>
+
+        <!-- Order Actions -->
+        <div class="flex justify-end space-x-4">
+            <button onclick="clearOrder()"
+                    class="bg-gray-500 text-white py-2 px-6 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                Clear Order
+            </button>
+            <button onclick="placeOrder()"
+                    class="bg-green-600 text-white py-2 px-6 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                Place Order
+            </button>
+            <a th:href="@{/profile}"
+               class="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Back to Profile
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    let medicines = [];
+    let orderItems = [];
+
+    // Load medicines when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        loadMedicines();
+    });
+
+    async function loadMedicines() {
+        try {
+            console.log('Loading medicines...');
+            const response = await fetch('/api/medicines');
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Medicines loaded:', data);
+
+            medicines = data;
+            populateMedicineSelect();
+
+        } catch (error) {
+            console.error('Error loading medicines:', error);
+            document.getElementById('medicineSelect').innerHTML = '<option value="">Error loading medicines</option>';
+
+            // Fallback: Try to load from the HTML page if API fails
+            try {
+                const fallbackResponse = await fetch('/medicines');
+                if (fallbackResponse.ok) {
+                    console.log('Trying fallback method...');
+                    // This is more complex - we'd need to parse HTML, so let's stick with API
+                }
+            } catch (fallbackError) {
+                console.error('Fallback also failed:', fallbackError);
+            }
+        }
+    }
+
+    function populateMedicineSelect() {
+        const select = document.getElementById('medicineSelect');
+
+        if (medicines.length === 0) {
+            select.innerHTML = '<option value="">No medicines available</option>';
+            return;
+        }
+
+        select.innerHTML = '<option value="">Select a medicine</option>';
+
+        medicines.forEach(medicine => {
+            const option = document.createElement('option');
+            option.value = medicine.medicineId;
+            option.textContent = `${medicine.name} - $${medicine.price} (Stock: ${medicine.quantity})`;
+            option.setAttribute('data-price', medicine.price);
+            option.setAttribute('data-name', medicine.name);
+            option.setAttribute('data-stock', medicine.quantity);
+            select.appendChild(option);
+        });
+
+        console.log('Medicine dropdown populated with', medicines.length, 'items');
+    }
+
+    function addMedicineToOrder() {
+        const medicineSelect = document.getElementById('medicineSelect');
+        const quantityInput = document.getElementById('quantity');
+
+        const medicineId = parseInt(medicineSelect.value);
+        const quantity = parseInt(quantityInput.value);
+
+        if (!medicineId) {
+            alert('Please select a medicine');
+            return;
+        }
+
+        if (isNaN(quantity) || quantity < 1) {
+            alert('Please enter a valid quantity (minimum 1)');
+            return;
+        }
+
+        const selectedOption = medicineSelect.options[medicineSelect.selectedIndex];
+        const medicineName = selectedOption.getAttribute('data-name');
+        const price = parseFloat(selectedOption.getAttribute('data-price'));
+        const stock = parseInt(selectedOption.getAttribute('data-stock'));
+        const subtotal = price * quantity;
+
+        // Check stock availability
+        if (quantity > stock) {
+            alert(`Only ${stock} units available in stock!`);
+            return;
+        }
+
+        // Check if medicine already in order
+        const existingItemIndex = orderItems.findIndex(item => item.medicineId === medicineId);
+
+        if (existingItemIndex > -1) {
+            // Update existing item
+            const newQuantity = orderItems[existingItemIndex].quantity + quantity;
+            if (newQuantity > stock) {
+                alert(`Cannot add more than ${stock} units total!`);
+                return;
+            }
+            orderItems[existingItemIndex].quantity = newQuantity;
+            orderItems[existingItemIndex].subtotal = orderItems[existingItemIndex].quantity * price;
+        } else {
+            // Add new item
+            orderItems.push({
+                medicineId: medicineId,
+                medicineName: medicineName,
+                price: price,
+                quantity: quantity,
+                subtotal: subtotal
+            });
+        }
+
+        updateOrderDisplay();
+
+        // Reset form
+        quantityInput.value = 1;
+        medicineSelect.focus();
+    }
+
+    function updateOrderDisplay() {
+        const tbody = document.getElementById('orderItemsTable');
+        const totalElement = document.getElementById('orderTotal');
+
+        tbody.innerHTML = '';
+        let total = 0;
+
+        orderItems.forEach((item, index) => {
+            total += item.subtotal;
+
+            const row = document.createElement('tr');
+            row.className = 'border-b hover:bg-gray-50';
+            row.innerHTML = `
+                    <td class="py-3 px-4 font-medium">${item.medicineName}</td>
+                    <td class="py-3 px-4">$${item.price.toFixed(2)}</td>
+                    <td class="py-3 px-4">
+                        <input type="number" value="${item.quantity}" min="1"
+                               onchange="updateQuantity(${index}, this.value)"
+                               class="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    </td>
+                    <td class="py-3 px-4 font-semibold">$${item.subtotal.toFixed(2)}</td>
+                    <td class="py-3 px-4">
+                        <button onclick="removeOrderItem(${index})"
+                                class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm focus:outline-none focus:ring-1 focus:ring-red-500">
+                            Remove
+                        </button>
+                    </td>
+                `;
+            tbody.appendChild(row);
+        });
+
+        totalElement.textContent = total.toFixed(2);
+
+        if (orderItems.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="py-4 px-4 text-center text-gray-500">No items in order</td></tr>';
+        }
+    }
+
+    function updateQuantity(index, newQuantity) {
+        const quantity = parseInt(newQuantity);
+        if (quantity > 0) {
+            // Check stock for this medicine
+            const medicineId = orderItems[index].medicineId;
+            const medicine = medicines.find(m => m.medicineId === medicineId);
+
+            if (medicine && quantity > medicine.quantity) {
+                alert(`Only ${medicine.quantity} units available in stock!`);
+                return;
+            }
+
+            orderItems[index].quantity = quantity;
+            orderItems[index].subtotal = orderItems[index].price * quantity;
+            updateOrderDisplay();
+        }
+    }
+
+    function removeOrderItem(index) {
+        orderItems.splice(index, 1);
+        updateOrderDisplay();
+    }
+
+    function clearOrder() {
+        if (orderItems.length === 0) {
+            return;
+        }
+
+        if (confirm('Are you sure you want to clear the order? All items will be removed.')) {
+            orderItems = [];
+            updateOrderDisplay();
+        }
+    }
+
+    async function placeOrder() {
+        if (orderItems.length === 0) {
+            alert('Please add at least one medicine to the order');
+            return;
+        }
+
+        const userId = document.getElementById('userId').value;
+        const totalAmount = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
+
+        const orderData = {
+            userId: parseInt(userId),
+            totalAmount: totalAmount,
+            status: "PENDING",
+            orderDate: new Date().toISOString(),
+            orderItems: orderItems.map(item => ({
+                medicineId: item.medicineId,
+                quantity: item.quantity,
+                price: item.price
+            }))
+        };
+
+        console.log('Placing order:', orderData);
+
+        try {
+            // First create the order
+            const createResponse = await fetch('/api/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(orderData)
+            });
+
+            const createResult = await createResponse.json();
+            console.log('Create order response:', createResult);
+
+            if (createResponse.ok) {
+                // Extract order ID from response
+                let orderId;
+                if (createResult.orderId) {
+                    orderId = createResult.orderId;
+                } else if (createResult.message) {
+                    // Try to parse order ID from message
+                    const match = createResult.message.match(/orderId["']?\s*:\s*(\d+)/);
+                    orderId = match ? match[1] : null;
+                }
+
+                if (orderId) {
+                    // Now checkout the order
+                    const checkoutData = {
+                        orderId: parseInt(orderId),
+                        ...orderData
+                    };
+
+                    const checkoutResponse = await fetch('/api/orders/checkout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(checkoutData)
+                    });
+
+                    const checkoutResult = await checkoutResponse.json();
+                    console.log('Checkout response:', checkoutResult);
+
+                    if (checkoutResponse.ok) {
+                        alert(`Order placed successfully! Order ID: ${orderId}`);
+                        window.location.href = '/profile';
+                    } else {
+                        alert('Order created but checkout failed: ' + (checkoutResult.error || 'Unknown error'));
+                    }
+                } else {
+                    alert('Order created successfully! (Order ID not returned)');
+                    window.location.href = '/profile';
+                }
+            } else {
+                alert('Error creating order: ' + (createResult.error || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error placing order:', error);
+            alert('Error placing order: ' + error.message);
+        }
+    }
+
+    // Add keyboard shortcut for adding items
+    document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && document.activeElement.id !== 'quantity') {
+            addMedicineToOrder();
+        }
+    });
+</script>
+</body>
+</html>
