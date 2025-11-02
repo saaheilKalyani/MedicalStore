@@ -1,3 +1,4 @@
+<!-- register.html -->
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -5,58 +6,103 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Medical Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-<div class="bg-white p-8 rounded-lg shadow-md w-96">
-    <h1 class="text-2xl font-bold text-center mb-6">Register</h1>
-
-    <form th:action="@{/register}" method="post" th:object="${user}">
-        <div class="mb-4">
-            <label for="username" class="block text-gray-700 text-sm font-bold mb-2">Username</label>
-            <input type="text" id="username" th:field="*{username}" required
-                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+<div class="bg-white rounded-2xl shadow-2xl overflow-hidden w-full max-w-md">
+    <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-center">
+        <div class="bg-white/20 p-3 rounded-full inline-flex mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
         </div>
+        <h1 class="text-2xl font-bold text-white">MediCare Store</h1>
+        <p class="text-blue-100 mt-2">Create your account</p>
+    </div>
 
-        <div class="mb-4">
-            <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email</label>
-            <input type="email" id="email" th:field="*{email}" required
-                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <div class="p-8">
+        <form th:action="@{/register}" method="post" th:object="${user}">
+            <div class="mb-4">
+                <label for="username" class="block text-gray-700 text-sm font-medium mb-2">Username</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-user text-gray-400"></i>
+                    </div>
+                    <input type="text" id="username" th:field="*{username}" required
+                           class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                           placeholder="Choose a username">
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="email" class="block text-gray-700 text-sm font-medium mb-2">Email</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-envelope text-gray-400"></i>
+                    </div>
+                    <input type="email" id="email" th:field="*{email}" required
+                           class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                           placeholder="Enter your email">
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="address" class="block text-gray-700 text-sm font-medium mb-2">Address</label>
+                <div class="relative">
+                    <div class="absolute top-3 left-3 pointer-events-none">
+                        <i class="fas fa-home text-gray-400"></i>
+                    </div>
+                    <textarea id="address" th:field="*{address}"
+                              class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                              rows="2" placeholder="Enter your address"></textarea>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="role" class="block text-gray-700 text-sm font-medium mb-2">Role</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-user-tag text-gray-400"></i>
+                    </div>
+                    <select id="role" th:field="*{role}"
+                            class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 appearance-none bg-white">
+                        <option value="CUSTOMER">CUSTOMER</option>
+                        <option value="SUPPLIER">SUPPLIER</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                        <i class="fas fa-chevron-down text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label for="rawPassword" class="block text-gray-700 text-sm font-medium mb-2">Password</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-lock text-gray-400"></i>
+                    </div>
+                    <input type="password" id="rawPassword" name="rawPassword" required
+                           class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                           placeholder="Create a password">
+                </div>
+            </div>
+
+            <div th:if="${error}" class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center">
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                <span th:text="${error}"></span>
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 shadow-md hover:shadow-lg font-medium">
+                <i class="fas fa-user-plus mr-2"></i> Create Account
+            </button>
+        </form>
+
+        <div class="mt-6 text-center">
+            <a th:href="@{/login}" class="text-blue-600 hover:text-blue-800 transition duration-200 font-medium">
+                <i class="fas fa-sign-in-alt mr-1"></i> Already have an account? Login
+            </a>
         </div>
-
-        <div class="mb-4">
-            <label for="address" class="block text-gray-700 text-sm font-bold mb-2">Address</label>
-            <textarea id="address" th:field="*{address}"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      rows="2"></textarea>
-        </div>
-
-        <div class="mb-4">
-            <label for="role" class="block text-gray-700 text-sm font-bold mb-2">Role</label>
-            <select id="role" th:field="*{role}"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="CUSTOMER">CUSTOMER</option>
-                <option value="SUPPLIER">SUPPLIER</option>
-            </select>
-        </div>
-
-        <div class="mb-6">
-            <label for="rawPassword" class="block text-gray-700 text-sm font-bold mb-2">Password</label>
-            <input type="password" id="rawPassword" name="rawPassword" required
-                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-        </div>
-
-        <div th:if="${error}" class="mb-4 p-3 bg-red-100 text-red-700 rounded">
-            <span th:text="${error}"></span>
-        </div>
-
-        <button type="submit"
-                class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            Register
-        </button>
-    </form>
-
-    <div class="mt-4 text-center">
-        <a th:href="@{/login}" class="text-blue-600 hover:text-blue-800">Already have an account? Login</a>
     </div>
 </div>
 </body>

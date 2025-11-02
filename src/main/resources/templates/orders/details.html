@@ -1,41 +1,94 @@
+<!-- order details.html -->
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8"/>
-    <title>Order Details</title>
-    <link href="/css/tailwind.css" rel="stylesheet"/>
+    <title>Order Details - Medical Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="p-6 bg-gray-50">
-<div class="container mx-auto">
-    <a href="/orders" class="text-sm text-gray-600">&larr; Back to orders</a>
-    <h1 class="text-2xl font-semibold mt-2">Order <span th:text="${order.orderId}">#1</span></h1>
-    <div class="mt-4 bg-white p-4 rounded shadow">
-        <p><strong>User ID:</strong> <span th:text="${order.userId}"></span></p>
-        <p><strong>Order Date:</strong> <span th:text="${order.orderDate}"></span></p>
-        <p><strong>Status:</strong> <span th:text="${order.status}"></span></p>
-        <h2 class="mt-4 font-medium">Items</h2>
-        <table class="w-full mt-2">
-            <thead><tr><th>Medicine</th><th>Qty</th><th>Price</th></tr></thead>
-            <tbody>
-            <tr th:each="it : ${order.items}">
-                <td th:text="${it.medicineId}">MedID</td>
-                <td th:text="${it.quantity}">1</td>
-                <td th:text="${it.price}">10.00</td>
-            </tr>
-            </tbody>
-        </table>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-50 min-h-screen p-6">
+<div class="container mx-auto max-w-4xl">
+    <a href="/orders" class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4 transition duration-200">
+        <i class="fas fa-arrow-left mr-2"></i> Back to orders
+    </a>
 
-        <div class="mt-4">
-            <form th:action="@{|/order/status/${order.orderId}|}" method="post" class="flex items-center space-x-2">
-                <select name="status" class="p-2 border rounded">
-                    <option th:selected="${order.status == 'PENDING'}">PENDING</option>
-                    <option th:selected="${order.status == 'PROCESSING'}">PROCESSING</option>
-                    <option th:selected="${order.status == 'SHIPPED'}">SHIPPED</option>
-                    <option th:selected="${order.status == 'DELIVERED'}">DELIVERED</option>
-                    <option th:selected="${order.status == 'CANCELLED'}">CANCELLED</option>
-                </select>
-                <button type="submit" class="px-3 py-2 bg-indigo-600 text-white rounded">Update Status</button>
-            </form>
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4">
+            <h1 class="text-2xl font-bold text-white flex items-center">
+                <i class="fas fa-file-invoice mr-3"></i>Order Details
+                <span class="ml-2 font-mono">#<span th:text="${order.orderId}">1</span></span>
+            </h1>
+        </div>
+
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-info-circle mr-2 text-blue-500"></i>Order Information
+                    </h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">User ID:</span>
+                            <span class="font-medium" th:text="${order.userId}"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Order Date:</span>
+                            <span class="font-medium" th:text="${order.orderDate}"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Status:</span>
+                            <span class="font-medium">
+                                <span th:if="${order.status == 'COMPLETED'}" class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">COMPLETED</span>
+                                <span th:if="${order.status == 'PENDING'}" class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">PENDING</span>
+                                <span th:if="${order.status == 'PROCESSING'}" class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">PROCESSING</span>
+                                <span th:if="${order.status == 'CANCELLED'}" class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">CANCELLED</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-shopping-bag mr-2 text-green-500"></i>Order Items
+                    </h3>
+                    <div class="space-y-2">
+                        <div th:each="it : ${order.items}" class="flex justify-between items-center border-b pb-2">
+                            <div>
+                                <span class="font-medium">Medicine ID: <span th:text="${it.medicineId}">MedID</span></span>
+                                <div class="text-sm text-gray-500">
+                                    Qty: <span th:text="${it.quantity}">1</span> × $<span th:text="${it.price}">10.00</span>
+                                </div>
+                            </div>
+                            <span class="font-semibold text-green-600">$<span th:text="${it.quantity * it.price}">10.00</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 rounded-xl p-4 mb-6">
+                <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+                    <i class="fas fa-edit mr-2 text-blue-500"></i>Update Order Status
+                </h3>
+                <form th:action="@{|/order/status/${order.orderId}|}" method="post" class="flex items-center space-x-4">
+                    <div class="relative flex-1">
+                        <select name="status" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 appearance-none bg-white">
+                            <option value="PENDING" th:selected="${order.status == 'PENDING'}">PENDING</option>
+                            <option value="PROCESSING" th:selected="${order.status == 'PROCESSING'}">PROCESSING</option>
+                            <option value="SHIPPED" th:selected="${order.status == 'SHIPPED'}">SHIPPED</option>
+                            <option value="DELIVERED" th:selected="${order.status == 'DELIVERED'}">DELIVERED</option>
+                            <option value="CANCELLED" th:selected="${order.status == 'CANCELLED'}">CANCELLED</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                            <i class="fas fa-chevron-down text-gray-400"></i>
+                        </div>
+                    </div>
+                    <button type="submit"
+                            class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 shadow-md hover:shadow-lg flex items-center">
+                        <i class="fas fa-save mr-2"></i> Update Status
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>

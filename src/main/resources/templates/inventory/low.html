@@ -1,41 +1,77 @@
+<!-- low stock.html -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Low Stock</title>
-    <link href="/css/tailwind.css" rel="stylesheet">
+    <title>Low Stock - Medical Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="p-6 bg-gray-50">
+<body class="bg-gradient-to-br from-blue-50 to-indigo-50 min-h-screen p-6">
 <div class="container mx-auto">
-    <h1 class="text-2xl font-bold mb-4">Low Stock Medicines (≤ <span th:text="${threshold}">10</span>)</h1>
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div class="bg-gradient-to-r from-orange-500 to-red-600 px-6 py-4">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-white flex items-center">
+                    <i class="fas fa-exclamation-triangle mr-3"></i>Low Stock Alert
+                </h1>
+                <div class="bg-white/20 p-2 rounded-full">
+                    <i class="fas fa-boxes text-white"></i>
+                </div>
+            </div>
+            <p class="text-orange-100 mt-2">Medicines with stock ≤ <span class="font-bold" th:text="${threshold}">10</span></p>
+        </div>
 
-    <div class="mb-4">
-        <form method="get" class="flex items-center space-x-2">
-            <label class="text-gray-700">Threshold:</label>
-            <input type="number" name="threshold" th:value="${threshold}" min="0" class="p-2 border rounded w-20">
-            <button type="submit" class="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Filter</button>
-        </form>
+        <div class="p-6">
+            <div class="mb-6">
+                <form method="get" class="flex items-center space-x-4 bg-blue-50 rounded-xl p-4">
+                    <label class="text-gray-700 font-medium">Set Low Stock Threshold:</label>
+                    <div class="relative">
+                        <input type="number" name="threshold" th:value="${threshold}" min="0"
+                               class="w-24 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                    </div>
+                    <button type="submit"
+                            class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2 px-6 rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 shadow-md hover:shadow-lg flex items-center">
+                        <i class="fas fa-filter mr-2"></i> Filter
+                    </button>
+                </form>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl shadow-inner border border-gray-100">
+                <table class="min-w-full bg-white">
+                    <thead>
+                    <tr class="bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700">
+                        <th class="py-4 px-6 text-left font-semibold">Inventory ID</th>
+                        <th class="py-4 px-6 text-left font-semibold">Medicine ID</th>
+                        <th class="py-4 px-6 text-left font-semibold">Supplier ID</th>
+                        <th class="py-4 px-6 text-left font-semibold">Quantity</th>
+                        <th class="py-4 px-6 text-left font-semibold">Last Updated</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="inv : ${inventories}" class="border-b hover:bg-red-50 transition duration-200">
+                        <td class="py-4 px-6 font-mono" th:text="${inv.inventoryId}"></td>
+                        <td class="py-4 px-6 font-medium" th:text="${inv.medicineId}"></td>
+                        <td class="py-4 px-6" th:text="${inv.supplierId}"></td>
+                        <td class="py-4 px-6">
+                            <span th:class="${inv.quantity == 0} ? 'px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium animate-pulse' : 'px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium'"
+                                  th:text="${inv.quantity}"></span>
+                        </td>
+                        <td class="py-4 px-6 text-gray-500" th:text="${inv.lastUpdated}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty state -->
+            <div th:if="${#lists.isEmpty(inventories)}" class="text-center py-12">
+                <div class="text-green-500 mb-4">
+                    <i class="fas fa-check-circle fa-3x"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-700 mb-2">No low stock items</h3>
+                <p class="text-gray-500">All medicines have sufficient stock levels.</p>
+            </div>
+        </div>
     </div>
-
-    <table class="min-w-full bg-white shadow rounded-lg overflow-hidden">
-        <thead>
-        <tr class="bg-gray-100">
-            <th class="p-3 text-left">Inventory ID</th>
-            <th class="p-3 text-left">Medicine ID</th>
-            <th class="p-3 text-left">Supplier ID</th>
-            <th class="p-3 text-left">Quantity</th>
-            <th class="p-3 text-left">Last Updated</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="inv : ${inventories}" class="border-t hover:bg-gray-50">
-            <td class="p-3" th:text="${inv.inventoryId}"></td>
-            <td class="p-3" th:text="${inv.medicineId}"></td>
-            <td class="p-3" th:text="${inv.supplierId}"></td>
-            <td class="p-3 font-semibold" th:class="${inv.quantity == 0} ? 'text-red-600' : 'text-orange-600'" th:text="${inv.quantity}"></td>
-            <td class="p-3" th:text="${inv.lastUpdated}"></td>
-        </tr>
-        </tbody>
-    </table>
 </div>
 </body>
 </html>
